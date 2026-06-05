@@ -20,8 +20,8 @@ EC_KEY *ec_load(char const *folder)
 	if (!folder)
 		return (NULL);
 
-	sprintf(path_pub, "%s/key_pub.pem", folder);
-	sprintf(path_priv, "%s/key.pem", folder);
+	sprintf(path_pub, "%s/" PUB_FILENAME, folder);
+	sprintf(path_priv, "%s/" PRI_FILENAME, folder);
 
 	fp_pub = fopen(path_pub, "r");
 	if (!fp_pub)
