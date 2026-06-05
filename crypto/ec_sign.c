@@ -1,4 +1,5 @@
 #include "hblk_crypto.h"
+#include <string.h>
 #include <openssl/ecdsa.h>
 #include <openssl/sha.h>
 
@@ -17,8 +18,11 @@ uint8_t *ec_sign(EC_KEY const *key, uint8_t const *msg,
 	unsigned char dgst[SHA256_DIGEST_LENGTH];
 	unsigned int siglen = 0;
 
-	if (!key || !msg || !sig)
+	if (!key || !msg || !msglen || !sig)
 		return (NULL);
+
+	memset(sig->sig, 0, SIG_MAX_LEN);
+	sig->len = 0;
 
 	if (!SHA256(msg, msglen, dgst))
 		return (NULL);

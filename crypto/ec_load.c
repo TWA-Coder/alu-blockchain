@@ -8,7 +8,7 @@
  * ec_load - Loads an EC key pair from the disk
  * @folder: The path to the folder from which to load the keys
  *
- * Return: Pointer to the created EC key pair upon success, or NULL upon failure
+ * Return: Pointer to EC key pair upon success, or NULL upon failure
  */
 EC_KEY *ec_load(char const *folder)
 {
