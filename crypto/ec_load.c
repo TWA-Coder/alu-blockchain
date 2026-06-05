@@ -1,49 +1,53 @@
 #include "hblk_crypto.h"
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 #include <openssl/pem.h>
 
 /**
- * ec_load - loads an EC key pair from the disk.
- * @folder: the path to the folder from which to load the keys
+ * ec_load - Loads an EC key pair from the disk
+ * @folder: The path to the folder from which to load the keys
  *
- * Return: pointer to the created EC key pair, or NULL upon failure
+ * Return: Pointer to the created EC key pair upon success, or NULL upon failure
  */
 EC_KEY *ec_load(char const *folder)
 {
-	char path[1024];
-	FILE *fp_priv, *fp_pub;
+	FILE *fp_pub, *fp_priv;
+	char path_pub[1024];
+	char path_priv[1024];
 	EC_KEY *key = NULL;
 
 	if (!folder)
 		return (NULL);
 
-	snprintf(path, 1024, "%s/%s", folder, "key_pub.pem");
-	fp_pub = fopen(path, "r");
+	sprintf(path_pub, "%s/key_pub.pem", folder);
+	sprintf(path_priv, "%s/key.pem", folder);
+
+	fp_pub = fopen(path_pub, "r");
 	if (!fp_pub)
 		return (NULL);
 
-	snprintf(path, 1024, "%s/%s", folder, "key.pem");
-	fp_priv = fopen(path, "r");
-	if (!fp_priv)
+	if (!PEM_read_EC_PUBKEY(fp_pub, &key, NULL, NULL))
 	{
 		fclose(fp_pub);
 		return (NULL);
 	}
+	fclose(fp_pub);
 
-	key = EC_KEY_new_by_curve_name(EC_CURVE);
-	if (key)
+	fp_priv = fopen(path_priv, "r");
+	if (!fp_priv)
 	{
-		if (!PEM_read_EC_PUBKEY(fp_pub, &key, NULL, NULL) ||
-		    !PEM_read_ECPrivateKey(fp_priv, &key, NULL, NULL))
-		{
-			EC_KEY_free(key);
-			key = NULL;
-		}
+		EC_KEY_free(key);
+		return (NULL);
 	}
 
+	if (!PEM_read_ECPrivateKey(fp_priv, &key, NULL, NULL))
+	{
+		fclose(fp_priv);
+		EC_KEY_free(key);
+		return (NULL);
+	}
 	fclose(fp_priv);
-	fclose(fp_pub);
 
 	return (key);
 }
